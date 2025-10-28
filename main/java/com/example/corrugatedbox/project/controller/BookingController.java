@@ -1,0 +1,113 @@
+package com.example.corrugatedbox.project.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.corrugatedbox.project.CustomException.UserNotFoundException;
+import com.example.corrugatedbox.project.Services.BookingService;
+import com.example.corrugatedbox.project.entity.Booking;
+import com.example.corrugatedbox.project.errorresponse.ErrorResponse;
+
+@RestController
+@RequestMapping("/booking")
+public class BookingController {
+
+	
+	
+			
+				@Autowired
+				private BookingService bookingService;
+
+				//@PostMapping("/add")
+				//public ResponseEntity<?> registerdUser(@RequestBody Booking booking) {
+					//Booking createdUser = userService.create(user);
+					//return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+				//}
+
+				@GetMapping("/all")
+				public ResponseEntity<?> getAllUserser() {
+					try {
+						return new ResponseEntity<>(bookingService.fetchAll(), HttpStatus.OK);
+					} catch (Exception e) {
+						return new ResponseEntity<>
+						(new ErrorResponse("Booking Fetching is failed", e.getMessage()),
+								HttpStatus.BAD_REQUEST);
+					}
+
+				}
+				@GetMapping("/getuser/{userId}")
+				public ResponseEntity<?> getUserById(@PathVariable("userId") Integer id) {
+					try {
+						return  ResponseEntity.ok(bookingService.fetchById(id));
+						
+					} catch (Exception e) {
+						
+						ErrorResponse errorResponce=
+					    new ErrorResponse("Booking Fetching is failed", e.getMessage());
+						return new ResponseEntity<>
+						(errorResponce,HttpStatus.BAD_REQUEST);
+					}
+				}
+
+				@PutMapping("/update/{bookingId}")
+				public ResponseEntity<?> updateuserById(@PathVariable("userId") Integer id,
+						@RequestBody Booking updateUser) {
+					try {
+						Booking existingUser=bookingService.fetchById(id);
+						
+						return  ResponseEntity.ok(bookingService.update(updateUser, existingUser));
+						
+					} catch (Exception e) {
+						
+						ErrorResponse errorResponce= new ErrorResponse("User updation is failed", e.getMessage());
+						return new ResponseEntity<>(errorResponce,HttpStatus.BAD_REQUEST);
+					}
+				}
+				@DeleteMapping("/delete/{bookingId}")
+				public ResponseEntity<?>deleteUserById(@PathVariable ("userId") Integer id)
+				{ try {
+					Booking existingUser=bookingService.fetchById(id);
+					return ResponseEntity.ok(bookingService.delete(existingUser));
+							
+				} catch (Exception e) {
+
+					ErrorResponse errorResponce= new ErrorResponse("User deletion is failead", e.getMessage());
+					return new ResponseEntity<>(errorResponce,HttpStatus.BAD_REQUEST);
+					
+				}
+					
+				}
+				@GetMapping("/getbyName/{name}")
+				public ResponseEntity<?> getUserByUserName(@PathVariable String name){
+					try {
+						ResponseEntity res = null;
+						Booking foundUser = bookingService.fetchUserByUserName(name);
+						if(foundUser != null) {
+							return res.ok(foundUser);
+						
+						}else {
+							throw new UserNotFoundException("Invalid Username..");
+						}
+					
+					} catch (Exception e) {
+						return new ResponseEntity<>(new ErrorResponse("fetching user by username failed.", e.getMessage()),HttpStatus.BAD_REQUEST);
+					}
+					
+					
+				}
+				
+		}
+
+		
+
+
+
